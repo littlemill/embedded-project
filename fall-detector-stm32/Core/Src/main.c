@@ -160,7 +160,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-  float ax, ay, az, aMag, gx, gy, gz, gMag, accMult, gyroMult;
+  float ax, ay, az, aMag, gx, gy, gz, gMag, accMult, gyroMult, length;
   int hasFallen = 0; // true when has fallen more than X ticks
   gyroConnect();
 
@@ -177,7 +177,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     if (!gyroConnected()) {
-    	setBuzzer(0 || hasFallen);
+    	setBuzzer(hasFallen);
     	gyroConnect();
     }
 
@@ -214,9 +214,18 @@ int main(void)
 		hasFallen ? onHasFall() : onFall();
 	} else {
 		onNotFall();
+		HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
 	}
 	HAL_Delay(25);
-	HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
+
+	length = readMessage(RED_BOARD_HANDLE, buffer, 1);
+	if (length > 0) {
+		HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
+		hasFallen = 0;
+	} else {
+		HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
+	}
+
   }
   /* USER CODE END 3 */
 }

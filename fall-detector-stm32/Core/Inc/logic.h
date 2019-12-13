@@ -45,5 +45,12 @@ void onNotFall() {
 }
 
 
+int readMessage(UART_HandleTypeDef* handle, char *buffer, int maxLength) {
+	int length = 0;
+	while (HAL_UART_Receive(handle, buffer + length, 1, 100) == HAL_OK && length < maxLength) length++;
+	return length;
+}
+
+
 
 #endif /* INC_LOGIC_H_ */
