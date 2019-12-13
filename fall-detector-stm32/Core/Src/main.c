@@ -25,10 +25,19 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 // #include "defines.h"
+#include <stdio.h>
+#include <stdarg.h>
+
+#include "mydefines.h"
+
+
 #include "stm32f4xx_hal_uart.h"
 #include "stm32f4xx_hal_i2c.h"
 #include "tm_stm32_mpu6050.h"
-#include <stdio.h>
+
+#define DEV
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -75,18 +84,43 @@ void MX_USB_HOST_Process(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+TM_MPU6050_t MPU6050_Sensor;
+char buffer[512];
 
 // ========================= BUZZER =============================== //
+
 // connect pin to "S" and GND to "-"
-#define BUZZER_PIN GPIO_PIN_11
-#define BUZZER_ENABLE GPIO_PIN_SET
-#define BUZZER_DISABLE GPIO_PIN_RESET
 
 void setBuzzer(int state) {
-	HAL_GPIO_WritePin(GPIOD, BUZZER_PIN, state ? BUZZER_ENABLE : BUZZER_DISABLE);
+	HAL_GPIO_WritePin(BUZZER_OUT_PIN, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
+
+// ========================== I2C connect ========================= //
+
+
+int gyroConnected() {
+	return TM_I2C_IsDeviceConnected(GYRO_HANDLE, MPU6050_I2C_ADDR) == TM_I2C_Result_Ok;
+}
+
+void gyroConnect() {
+	  while (TM_MPU6050_Init(&MPU6050_Sensor, TM_MPU6050_Device_0, TM_MPU6050_Accelerometer_8G, TM_MPU6050_Gyroscope_250s) != TM_MPU6050_Result_Ok){
+		  HAL_GPIO_WritePin(GYRO_STATUS_LED_PIN, GPIO_PIN_SET); // turn on red light
+		  HAL_Delay(10);
+	  }
+	  HAL_GPIO_WritePin(GYRO_STATUS_LED_PIN, GPIO_PIN_RESET); // turn on red light
+	  HAL_Delay(50);
+}
+
+void uartPrintf(UART_HandleTypeDef* handle, const char* format, ... ) {
+    va_list args;
+    va_start( args, format );
+    int n = sprintf(buffer, format, args);
+    HAL_UART_Transmit(handle, buffer, n, 1000);
+    va_end( args );
+}
+
+#include "logic.h"
 
 /* USER CODE END 0 */
 
@@ -115,8 +149,6 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  TM_MPU6050_t MPU6050_Sensor;
-  MPU6050_Sensor.Address = 0xD0;
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -128,16 +160,11 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-  float ax, ay, az, gx, gy, gz, res, accMult, gyroMult;
-  char data[256];
+  float ax, ay, az, aMag, gx, gy, gz, gMag, accMult, gyroMult;
+  int hasFallen = 0; // true when has fallen more than X ticks
+  gyroConnect();
 
 
-  while ((res = TM_MPU6050_Init(&MPU6050_Sensor, TM_MPU6050_Device_0, TM_MPU6050_Accelerometer_8G, TM_MPU6050_Gyroscope_250s)) != TM_MPU6050_Result_Ok){
-	  HAL_UART_Transmit(&huart2, "Initializing\r\n", 14, 1000);
-	  HAL_Delay(100);
-  }
-  HAL_UART_Transmit(&huart2, "Initialize OK\r\n", 15, 1000);
-  HAL_Delay(500);
 
   /* USER CODE END 2 */
 
@@ -149,45 +176,47 @@ int main(void)
     MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
-    if (TM_I2C_IsDeviceConnected(MPU6050_I2C, 0xD0) != TM_I2C_Result_Ok) { // reconnect in case of disconnect
-    	while ((res = TM_MPU6050_Init(&MPU6050_Sensor, TM_MPU6050_Device_0, TM_MPU6050_Accelerometer_8G, TM_MPU6050_Gyroscope_250s)) != TM_MPU6050_Result_Ok){
-		  HAL_UART_Transmit(&huart2, "reconnecting\r\n", 14, 1000);
-		  HAL_Delay(100);
-    	}
-    	HAL_UART_Transmit(&huart2, "reconnect OK\r\n", 14, 1000);
+    if (!gyroConnected()) {
+    	setBuzzer(0 || hasFallen);
+    	gyroConnect();
     }
-
-
 
     TM_MPU6050_ReadAll(&MPU6050_Sensor);
 
-	ax = MPU6050_Sensor.Accelerometer_X;
-	ay = MPU6050_Sensor.Accelerometer_Y;
-	az = MPU6050_Sensor.Accelerometer_Z;
-	gx = MPU6050_Sensor.Gyroscope_X;
-	gy = MPU6050_Sensor.Gyroscope_Y;
-	gz = MPU6050_Sensor.Gyroscope_Z;
-	accMult = (float)1/((1 << 16)/16)*9.81; // +-2
+	accMult = (float)1/((1 << 16)/16)*9.81; // +-8G
 	gyroMult = (float)1/((1 << 16)/500); // +-250
-	//temperature = MPU6050_Sensor.Temperature;
+
+	ax = MPU6050_Sensor.Accelerometer_X*accMult;
+	ay = MPU6050_Sensor.Accelerometer_Y*accMult;
+	az = MPU6050_Sensor.Accelerometer_Z*accMult;
+	aMag = ax*ax + ay*ay + az*az;
+
+	gx = MPU6050_Sensor.Gyroscope_X*gyroMult;
+	gy = MPU6050_Sensor.Gyroscope_Y*gyroMult;
+	gz = MPU6050_Sensor.Gyroscope_Z*gyroMult;
+	gMag = gx*gx + gy*gy + gz*gz;
 
 	/* Send the data to serial buffer */
 
-	sprintf(data,"acc value= X:%.2f\t = Y:%.2f\t = Z:%.2f\t gyro value= X:%.2f\t = Y:%.2f\t = Z:%.2f\t Temp= \r\n",
-			ax*accMult,
-			ay*accMult,
-			az*accMult,
-			gx*gyroMult,
-			gy*gyroMult,
-			gz*gyroMult);
-	HAL_UART_Transmit(&huart2, &data,strlen(data) , 1000);
-	HAL_Delay(200);
-	if (HAL_UART_Transmit(&huart3, "Hello\r\n", 7, 100) == HAL_OK) {
-		HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
-	} else {
-		HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
-	}
+#ifdef DEV
+	int n = sprintf(buffer, "A (%5.2f %5.2f %5.2f = %7.2f) G (%7.2f %7.2f %7.2f = %.2f)\r\n", ax, ay, az, aMag, gx, gy, gz, gMag);
+//	uartPrintf(RED_BOARD_HANDLE, "A (%5.2f %5.2f %5.2f = %7.2f) G (%7.2f %7.2f %7.2f = %.2f)\r\n", ax, ay, az, aMag, gx, gy, gz, gMag);
+	HAL_UART_Transmit(RED_BOARD_HANDLE, buffer, n, 100);
+#endif
 
+
+	if (isFalling(ax, ay, az, gx, gy, gz) || hasFallen){
+		HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
+		if (fallTick >= 3) {
+			hasFallen = 1;
+		}
+
+		hasFallen ? onHasFall() : onFall();
+	} else {
+		onNotFall();
+	}
+	HAL_Delay(25);
+	HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
   }
   /* USER CODE END 3 */
 }
@@ -438,8 +467,8 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(OTG_FS_PowerSwitchOn_GPIO_Port, OTG_FS_PowerSwitchOn_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, LD4_Pin|LD3_Pin|LD5_Pin|LD6_Pin 
-                          |Audio_RST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11|LD4_Pin|LD3_Pin|LD5_Pin 
+                          |LD6_Pin|Audio_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : CS_I2C_SPI_Pin */
   GPIO_InitStruct.Pin = CS_I2C_SPI_Pin;
@@ -483,10 +512,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
   HAL_GPIO_Init(CLK_IN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD4_Pin LD3_Pin LD5_Pin LD6_Pin 
-                           Audio_RST_Pin */
-  GPIO_InitStruct.Pin = LD4_Pin|LD3_Pin|LD5_Pin|LD6_Pin 
-                          |Audio_RST_Pin;
+  /*Configure GPIO pins : PD11 LD4_Pin LD3_Pin LD5_Pin 
+                           LD6_Pin Audio_RST_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_11|LD4_Pin|LD3_Pin|LD5_Pin 
+                          |LD6_Pin|Audio_RST_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
