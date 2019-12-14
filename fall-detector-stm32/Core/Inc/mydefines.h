@@ -17,9 +17,14 @@
 
 #define GYRO_HANDLE &hi2c1
 
-#define GYRO_STATUS_LED_PIN GPIOD, LD5_Pin
-#define FALL_STATUS_LED_PIN GPIOD, LD3_Pin
+#define GYRO_STATUS_LED_PIN GPIOD, LD5_Pin // red
+#define FALL_STATUS_LED_PIN GPIOD, LD3_Pin // orange
+#define OUT_STATUS_LED_PIN GPIOD, LD6_Pin // blue
+
+
 #define BUZZER_OUT_PIN GPIOD, GPIO_PIN_11
+#define FALL_ENABLE_LED_PIN GPIOD, GPIO_PIN_10 // custom pin
+#define OUT_ENABLE_LED_PIN GPIOD, GPIO_PIN_9 // custom pin
 
 
 

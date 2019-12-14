@@ -20,7 +20,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "usb_host.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -64,6 +63,8 @@ SPI_HandleTypeDef hspi1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 
+HCD_HandleTypeDef hhcd_USB_OTG_FS;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -76,8 +77,7 @@ static void MX_I2S3_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
-void MX_USB_HOST_Process(void);
-
+static void MX_USB_OTG_FS_HCD_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -103,13 +103,15 @@ int gyroConnected() {
 	return TM_I2C_IsDeviceConnected(GYRO_HANDLE, MPU6050_I2C_ADDR) == TM_I2C_Result_Ok;
 }
 
-void gyroConnect() {
+void gyroConnect(int maxTry) {
+	int tries = 0;
 	  while (TM_MPU6050_Init(&MPU6050_Sensor, TM_MPU6050_Device_0, TM_MPU6050_Accelerometer_8G, TM_MPU6050_Gyroscope_250s) != TM_MPU6050_Result_Ok){
 		  HAL_GPIO_WritePin(GYRO_STATUS_LED_PIN, GPIO_PIN_SET); // turn on red light
 		  HAL_Delay(10);
+		  tries++;
 	  }
-	  HAL_GPIO_WritePin(GYRO_STATUS_LED_PIN, GPIO_PIN_RESET); // turn on red light
 	  HAL_Delay(50);
+	  HAL_GPIO_WritePin(GYRO_STATUS_LED_PIN, GPIO_PIN_RESET);
 }
 
 void uartPrintf(UART_HandleTypeDef* handle, const char* format, ... ) {
@@ -121,6 +123,10 @@ void uartPrintf(UART_HandleTypeDef* handle, const char* format, ... ) {
 }
 
 #include "logic.h"
+
+int enableFallAlarm = 1, enableOutAlarm = 1;
+int fallen = 0, outOfRange = 0;
+
 
 /* USER CODE END 0 */
 
@@ -156,13 +162,14 @@ int main(void)
   MX_I2C1_Init();
   MX_I2S3_Init();
   MX_SPI1_Init();
-  MX_USB_HOST_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
+  MX_USB_OTG_FS_HCD_Init();
   /* USER CODE BEGIN 2 */
   float ax, ay, az, aMag, gx, gy, gz, gMag, accMult, gyroMult, length;
-  int hasFallen = 0; // true when has fallen more than X ticks
-  gyroConnect();
+  int outAlarmOn = 0, fallAlarmOn = 0;
+  int fallingNow = 0, gyroConn;
+  gyroConnect(100);
 
 
 
@@ -173,13 +180,22 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
-    if (!gyroConnected()) {
-    	setBuzzer(hasFallen);
-    	gyroConnect();
+
+	HAL_GPIO_WritePin(OUT_ENABLE_LED_PIN, enableOutAlarm ? GPIO_PIN_SET : GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(FALL_ENABLE_LED_PIN, enableFallAlarm ? GPIO_PIN_SET : GPIO_PIN_RESET);
+
+	 if (!gyroConnected()) {
+    	gyroConnect(100);
     }
+    // send error state
+//    if (!(gyroConn = gyroConnected())) {
+//    	uartPrintf(NODEMCU_HANDLE, "E");
+//    	continue;
+//    } else {
+//    	uartPrintf(NODEMCU_HANDLE, "e");
+//    }
 
     TM_MPU6050_ReadAll(&MPU6050_Sensor);
 
@@ -197,34 +213,88 @@ int main(void)
 	gMag = gx*gx + gy*gy + gz*gz;
 
 	/* Send the data to serial buffer */
-
 #ifdef DEV
 	int n = sprintf(buffer, "A (%5.2f %5.2f %5.2f = %7.2f) G (%7.2f %7.2f %7.2f = %.2f)\r\n", ax, ay, az, aMag, gx, gy, gz, gMag);
 //	uartPrintf(RED_BOARD_HANDLE, "A (%5.2f %5.2f %5.2f = %7.2f) G (%7.2f %7.2f %7.2f = %.2f)\r\n", ax, ay, az, aMag, gx, gy, gz, gMag);
 	HAL_UART_Transmit(RED_BOARD_HANDLE, buffer, n, 100);
 #endif
 
-
-	if (isFalling(ax, ay, az, gx, gy, gz) || hasFallen){
-		HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_SET);
+	// check fall sensor logic
+	if ((fallingNow = isFalling(ax, ay, az, gx, gy, gz)) || fallen){
+		HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, GPIO_PIN_SET);
 		if (fallTick >= 3) {
-			hasFallen = 1;
+			fallen = 1;
 		}
-
-		hasFallen ? onHasFall() : onFall();
 	} else {
-		onNotFall();
-		HAL_GPIO_WritePin(GPIOD, LD4_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, GPIO_PIN_RESET);
 	}
-	HAL_Delay(25);
+	HAL_Delay(10);
 
+
+	// listen command
+#ifdef DEV
 	length = readMessage(RED_BOARD_HANDLE, buffer, 1);
+#else
+	length = readMessage(NODEMCU_HANDLE, buffer, 1);
+#endif
 	if (length > 0) {
+		switch (buffer[0]) {
+		case 'R':
+			fallen = 0; break;
+		case 'r':
+			outOfRange = 0; break;
+		case 'F':
+			enableFallAlarm = 1; break;
+		case 'f':
+			enableFallAlarm = 0; break;
+		case 'O':
+			enableOutAlarm = 1; break;
+		case 'o':
+			enableOutAlarm = 0; break;
+		case 'X':
+			outOfRange = 1; break;
+		case 'x':
+			outOfRange = 0; break;
+		}
 		HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_SET);
-		hasFallen = 0;
 	} else {
 		HAL_GPIO_WritePin(GPIOD, LD3_Pin, GPIO_PIN_RESET);
 	}
+
+
+	// alarm logic
+	outAlarmOn = outOfRange && enableOutAlarm ;
+	fallAlarmOn = fallen && enableFallAlarm;
+	if (outAlarmOn || fallAlarmOn) {
+		setBuzzer(1);
+	} else {
+		setBuzzer(0);
+	}
+
+	HAL_GPIO_WritePin(OUT_STATUS_LED_PIN, outOfRange ? GPIO_PIN_SET : GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, fallen ? GPIO_PIN_SET : GPIO_PIN_RESET);
+
+
+
+#ifdef DEV
+	if (fallAlarmOn){
+		uartPrintf(RED_BOARD_HANDLE, "F");
+	}
+	else if (fallingNow) {
+		uartPrintf(RED_BOARD_HANDLE, "-");
+	} else {
+		uartPrintf(RED_BOARD_HANDLE, ".");
+	}
+
+#else
+	if (fallAlarmOn){
+		uartPrintf(NODEMCU_HANDLE, "F");
+	}
+	else {
+		uartPrintf(NODEMCU_HANDLE, "f");
+	}
+#endif
+
 
   }
   /* USER CODE END 3 */
@@ -453,6 +523,37 @@ static void MX_USART3_UART_Init(void)
 }
 
 /**
+  * @brief USB_OTG_FS Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USB_OTG_FS_HCD_Init(void)
+{
+
+  /* USER CODE BEGIN USB_OTG_FS_Init 0 */
+
+  /* USER CODE END USB_OTG_FS_Init 0 */
+
+  /* USER CODE BEGIN USB_OTG_FS_Init 1 */
+
+  /* USER CODE END USB_OTG_FS_Init 1 */
+  hhcd_USB_OTG_FS.Instance = USB_OTG_FS;
+  hhcd_USB_OTG_FS.Init.Host_channels = 8;
+  hhcd_USB_OTG_FS.Init.speed = HCD_SPEED_FULL;
+  hhcd_USB_OTG_FS.Init.dma_enable = DISABLE;
+  hhcd_USB_OTG_FS.Init.phy_itface = HCD_PHY_EMBEDDED;
+  hhcd_USB_OTG_FS.Init.Sof_enable = DISABLE;
+  if (HAL_HCD_Init(&hhcd_USB_OTG_FS) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USB_OTG_FS_Init 2 */
+
+  /* USER CODE END USB_OTG_FS_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -476,8 +577,8 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(OTG_FS_PowerSwitchOn_GPIO_Port, OTG_FS_PowerSwitchOn_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_11|LD4_Pin|LD3_Pin|LD5_Pin 
-                          |LD6_Pin|Audio_RST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11|LD4_Pin 
+                          |LD3_Pin|LD5_Pin|LD6_Pin|Audio_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : CS_I2C_SPI_Pin */
   GPIO_InitStruct.Pin = CS_I2C_SPI_Pin;
@@ -521,10 +622,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
   HAL_GPIO_Init(CLK_IN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PD11 LD4_Pin LD3_Pin LD5_Pin 
-                           LD6_Pin Audio_RST_Pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_11|LD4_Pin|LD3_Pin|LD5_Pin 
-                          |LD6_Pin|Audio_RST_Pin;
+  /*Configure GPIO pins : PD9 PD10 PD11 LD4_Pin 
+                           LD3_Pin LD5_Pin LD6_Pin Audio_RST_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11|LD4_Pin 
+                          |LD3_Pin|LD5_Pin|LD6_Pin|Audio_RST_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
