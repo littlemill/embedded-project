@@ -15,7 +15,7 @@ int fallTick = 0;
 int isFalling(float ax, float ay, float az, float gx, float gy, float gz) {
 	float aMag = ax*ax + ay*ay + az*az;
 	float gMag = gx*gx + gy*gy + gz*gz;
-	if (aMag > FALL_ACCEL_MAGNITUDE || gMag > FALL_GYRO_MAGNITUDE){
+	if (aMag > FALL_ACCEL_MAGNITUDE && aMag < 6000 || gMag > FALL_GYRO_MAGNITUDE && gMag < 40000){
 		fallTick++;
 		return 1;
 	}

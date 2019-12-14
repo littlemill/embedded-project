@@ -13,14 +13,18 @@
 #define FALL_GYRO_MAGNITUDE 20000
 
 #define RED_BOARD_HANDLE &huart2
-#define NODEMCU_HANDLE &huart3
+#ifdef DEV
+	#define NODEMCU_HANDLE RED_BOARD_HANDLE
+#else
+	#define NODEMCU_HANDLE &huart3
+#endif
 
 #define GYRO_HANDLE &hi2c1
 
 #define GYRO_STATUS_LED_PIN GPIOD, LD5_Pin // red
 #define FALL_STATUS_LED_PIN GPIOD, LD3_Pin // orange
 #define OUT_STATUS_LED_PIN GPIOD, LD6_Pin // blue
-
+#define COMMAND_RECV_LED_PIN GPIOD, LD4_Pin // green
 
 #define BUZZER_OUT_PIN GPIOD, GPIO_PIN_11
 #define FALL_ENABLE_LED_PIN GPIOD, GPIO_PIN_10 // custom pin
