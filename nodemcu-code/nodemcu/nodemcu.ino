@@ -102,7 +102,7 @@ void setup() {
     WiFi.mode(WIFI_STA);
     Serial.begin(115200);
     Serial.println("Starting...");
-    WiFiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
+    //WiFiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
 
     /* Initial WIFI, this is just a basic method to configure WIFI on ESP8266.                       */
     /* You may want to use other method that is more complicated, but provide better user experience */
