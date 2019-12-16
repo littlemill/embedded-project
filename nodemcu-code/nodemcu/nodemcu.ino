@@ -9,6 +9,9 @@
 #define APPID "testingNetpie"
 #define KEY "Y6ynR78mqQBIlSj"
 #define SECRET "wX8up1DQXlQ413t3glkRj5ehI"
+
+#define WIFI_SSID "ton-naao"
+#define WIFI_PASSWORD "mynameisaim"
   
 #define ALIAS   "esp8266"
 
@@ -23,10 +26,23 @@ MicroGear microgear(client);
 void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
 
     // TODO: check topic and handle message
+    char* m
     
     if (strcmp(topic, "/testingNetpie/fall/command") == 0) { // prefix the topic name with /testingNetpie/
       // TODO: check message and send command to device
       Serial.write("f");
+    }
+    if (strcmp(topic, "/fall/command") == 0) {
+      m = (char*)msg;
+      if (strcmp(m, "ON")) Serial.write("F");
+      if (strcmp(m, "OFF")) Serial.write("f");
+      if (strcmp(m, "RESET")) Serial.write("R");
+    }
+    if (strcmp(topic, "/out-of-range/command") == 0) {
+      m = (char*)msg;
+      if (strcmp(m, "ON")) Serial.write("O");
+      if (strcmp(m, "OFF")) Serial.write("o");
+      if (strcmp(m, "RESET")) Serial.write("r");
     }
     
     Serial.print("Incoming message --> ");
@@ -54,6 +70,8 @@ void onConnected(char *attribute, uint8_t* msg, unsigned int msglen) {
     Serial.println("Connected to NETPIE...");
     /* Set the alias of this microgear ALIAS */
     microgear.subscribe("/fall/command"); // TODO: subscribe to more topic 
+    microgear.subscribe("/out-of-range/command");
+    microgear.subscribe("/status/command");
     microgear.setAlias(ALIAS);
 }
 
@@ -105,6 +123,34 @@ void loop() {
     case 'E': Serial.println("Error"); break;
     case 'e': Serial.println("Not error"); break;
     }
+
+    // คนกำลังเดินออกจากพื้นที่ -> HTML
+    long rssi = WiFi.RSSI();
+    if( rssi < -80 ) {
+      Serial.write("X");
+      microgear.publish("/range","out");
+    }
+    else {
+      Serial.write("x");
+      microgear.publish("/range","in");
+    }
+
+    // user status -> HTML
+    if( cmd == 'F' ) {
+      microgear.publish("/fall","fall");
+    }
+    else if( cmd == 'f' ) {
+      microgear.publish("/fall","ok");
+    }
+
+    // board status -> HTML
+    if( cmd == 'E' ) {
+      microgear.publish("/board","error");
+    }
+    else if( cmd == 'e' ) {
+      microgear.publish("/board","fine");
+    }
+    
     /* To check if the microgear is still connected */
     if (microgear.connected()) {
         // Serial.println("connected");

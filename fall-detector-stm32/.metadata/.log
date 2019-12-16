@@ -1,0 +1,38 @@
+!SESSION 2019-12-16 15:14:36.292 -----------------------------------------------
+eclipse.buildId=Version 1.1.0
+java.version=12.0.1
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_TH
+Framework arguments:  -keyring /Users/ajinn/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/ajinn/.eclipse_keyring
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2019-12-16 15:15:14.153
+!MESSAGE Log4j initialized with config file /Users/ajinn/Desktop/embedded-project/fall-detector-stm32/.metadata/.log4j.xml
+
+!ENTRY org.eclipse.core.net 1 0 2019-12-16 15:15:14.845
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2019-12-16 15:15:15.340
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 4 4 2019-12-16 15:15:15.776
+!MESSAGE com.st.stm32cube.ide.mcu.ide/META-INF/version/build_ref file not found, build reference will not be reported into properties
+!SESSION 2019-12-16 15:16:04.732 -----------------------------------------------
+eclipse.buildId=Version 1.1.0
+java.version=12.0.1
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_TH
+Framework arguments:  -keyring /Users/ajinn/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/ajinn/.eclipse_keyring
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2019-12-16 15:16:21.601
+!MESSAGE Log4j initialized with config file /Users/ajinn/Desktop/embedded-project/fall-detector-stm32/.metadata/.log4j.xml
+
+!ENTRY org.eclipse.core.net 1 0 2019-12-16 15:16:23.057
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 4 4 2019-12-16 15:16:24.065
+!MESSAGE com.st.stm32cube.ide.mcu.ide/META-INF/version/build_ref file not found, build reference will not be reported into properties
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2019-12-16 15:16:28.879
+!MESSAGE Started RMI Server, listening on port 41337

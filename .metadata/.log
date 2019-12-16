@@ -1,0 +1,49 @@
+!SESSION 2019-12-16 15:11:39.387 -----------------------------------------------
+eclipse.buildId=Version 1.0.2
+java.version=1.8.0_202
+java.vendor=AdoptOpenJdk
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_TH
+Framework arguments:  -keyring /Users/ajinn/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -data /Users/ajinn/Desktop/embedded-project -keyring /Users/ajinn/.eclipse_keyring
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2019-12-16 15:11:45.578
+!MESSAGE Log4j initialized with config file /Users/ajinn/Desktop/embedded-project/.metadata/.log4j.xml
+
+!ENTRY org.eclipse.core.net 1 0 2019-12-16 15:11:46.410
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 4 4 2019-12-16 15:11:47.449
+!MESSAGE com.st.stm32cube.ide.mcu.ide/META-INF/version/build_ref file not found, build reference will not be reported into properties
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2019-12-16 15:12:01.991
+!MESSAGE Started RMI Server, listening on port 41338
+!SESSION 2019-12-16 15:12:22.113 -----------------------------------------------
+eclipse.buildId=Version 1.1.0
+java.version=12.0.1
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_TH
+Framework arguments:  -keyring /Users/ajinn/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/ajinn/.eclipse_keyring
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2019-12-16 15:12:38.005
+!MESSAGE Log4j initialized with config file /Users/ajinn/Desktop/embedded-project/.metadata/.log4j.xml
+
+!ENTRY org.eclipse.core.net 1 0 2019-12-16 15:12:39.280
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 4 4 2019-12-16 15:12:40.305
+!MESSAGE com.st.stm32cube.ide.mcu.ide/META-INF/version/build_ref file not found, build reference will not be reported into properties
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2019-12-16 15:12:44.904
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.ui.ide 4 4 2019-12-16 15:14:33.387
+!MESSAGE Problems saving workspace
+
+!ENTRY org.eclipse.ui.ide 2 1 2019-12-16 15:14:33.389
+!MESSAGE Problems occurred while trying to save the state of the workbench.
+!SUBENTRY 1 org.eclipse.core.resources 2 234 2019-12-16 15:14:33.389
+!MESSAGE The project description file (.project) for 'RemoteSystemsTempFiles' was missing.  This file contains important information about the project.  A new project description file has been created, but some information about the project may have been lost.
+
+!ENTRY org.eclipse.core.resources 2 10035 2019-12-16 15:14:33.601
+!MESSAGE The workspace will exit with unsaved changes in this session.
