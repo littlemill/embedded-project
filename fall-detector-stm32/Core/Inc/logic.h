@@ -10,39 +10,31 @@
 
 #include "mydefines.h"
 
-int fallTick = 0;
+int _fallTick = 0;
+int _hasFallen = 0;
 
-int isFalling(float ax, float ay, float az, float gx, float gy, float gz) {
+// main check falling logic
+int checkFalling(float ax, float ay, float az, float gx, float gy, float gz) {
 	float aMag = ax*ax + ay*ay + az*az;
 	float gMag = gx*gx + gy*gy + gz*gz;
 	if (aMag > FALL_ACCEL_MAGNITUDE && aMag < 6000 || gMag > FALL_GYRO_MAGNITUDE && gMag < 40000){
-		fallTick++;
+		_fallTick++;
+		if (_fallTick >= 3) _hasFallen = 1;
 		return 1;
 	}
-	fallTick = 0;
+	_fallTick = 0;
 	return 0;
 }
 
 
-int fallTicks() {
-	return fallTick;
+int hasFallen() {
+	return _hasFallen;
 }
 
-
-void onFall() {
-	setBuzzer(1);
-	uartPrintf(RED_BOARD_HANDLE, "-");
+int resetFallen() {
+	_hasFallen = 0;
 }
 
-void onHasFall() {
-	setBuzzer(1);
-	uartPrintf(RED_BOARD_HANDLE, "F");
-}
-
-void onNotFall() {
-	setBuzzer(0);
-	uartPrintf(RED_BOARD_HANDLE, ".");
-}
 
 
 int readMessage(UART_HandleTypeDef* handle, char *buffer, int maxLength) {

@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#define DEV //
+// #define DEV //
 #include "mydefines.h"
 
 #include "stm32f4xx_hal_uart.h"
@@ -181,7 +181,7 @@ int main(void) {
 			gyroConnect(100);
 		}
 
-		uartPrintf(RED_BOARD_HANDLE, gyroConnected() ? "e": "E");
+		uartPrintf(NODEMCU_HANDLE, gyroConnected() ? "e": "E");
 
 		if (gyroConn) { // why did connected always return 0 ?
 			TM_MPU6050_ReadAll(&MPU6050_Sensor);
@@ -208,16 +208,9 @@ int main(void) {
 			HAL_UART_Transmit(RED_BOARD_HANDLE, buffer, n, 100);
 #endif
 
-			// check fall sensor logic
-			if ((fallingNow = isFalling(ax, ay, az, gx, gy, gz))
-					|| fallen) {
-				HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, GPIO_PIN_SET);
-				if (fallTick >= 3) {
-					fallen = 1;
-				}
-			} else {
-				HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, GPIO_PIN_RESET);
-			}
+			// check fall sensor logic -- change logic.h
+			fallingNow = checkFalling(ax, ay, az, gx, gy, gz);
+			HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, (fallingNow || hasFallen()) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 		}
 
 		// listen command
