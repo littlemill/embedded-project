@@ -24,7 +24,7 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
 
     // TODO: check topic and handle message
     
-    if (strcmp(topic, "/testingNetpie/fall/command")) { // prefix the topic name with /testingNetpie/
+    if (strcmp(topic, "/testingNetpie/fall/command") == 0) { // prefix the topic name with /testingNetpie/
       // TODO: check message and send command to device
       Serial.write("f");
     }
