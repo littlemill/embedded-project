@@ -177,6 +177,8 @@ int main(void)
 		loopCount = (loopCount+1)%100;
 		if (loopCount == 0) {
 			uartPrintf(NODEMCU_HANDLE, "t");
+			uartPrintf(NODEMCU_HANDLE, "\n");
+			//ปกติเราจะ print ตรงนี้ทุก ๆ 100 loop
 		}
 
 		if (!(gyroConn = gyroConnected())) {
