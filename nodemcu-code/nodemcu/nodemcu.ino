@@ -12,6 +12,8 @@
 #define APPID "testingNetpie"
 #define KEY "Y6ynR78mqQBIlSj"
 #define SECRET "wX8up1DQXlQ413t3glkRj5ehI"
+//#define DEBUG(code) code
+#define DEBUG(code) 
 
 #define WIFI_SSID "OIL"
 #define WIFI_PASSWORD "123456790"
@@ -31,16 +33,16 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
 
     // TODO: check topic and handle message
     char* m="onMsghandler";
-    Serial.printf("%s : %s\n",m,topic);
+    //Serial.printf("%s : %s\n",m,topic);
     
     if (strcmp(topic, "/testingNetpie/fall/command") == 0) { // prefix the topic name with /testingNetpie/
       // TODO: check message and send command to device
       Serial.write("f");
-      Serial.println("Test\n");
+      DEBUG(Serial.println("Test\n");)
     }
     
     //เปิด / ปิด fall detect
-    if (strcmp(topic, "/fall/command") == 0) {
+    if (strcmp(topic, "/testingNetpie/fall/command") == 0) {
       m = (char*)msg;
       if (strcmp(m, "ON")) Serial.write("F");
       if (strcmp(m, "OFF")) Serial.write("f");
@@ -49,26 +51,30 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
 
     //เปิด / ปิด area checking ** เทียบว่าอันแรกเป็นไงเทียบกับอันสอง
     if (strcmp(topic, "/testingNetpie/out-of-range/command") == 0) {
-      Serial.println("/testingNetpie/out-of-range/command is detected !\n");
+      DEBUG(Serial.println("/testingNetpie/out-of-range/command is detected !\n");)
       m = (char*)msg;
       m[msglen]='\0';
       if (strcmp(m, "ON")==0){ 
 //        Serial.printf(t);
         Serial.write("O");
-        Serial.printf("area checking:on\n");
+        DEBUG(Serial.printf("area checking:on\n");)
       }
       if (strcmp(m, "OFF")==0){ 
         Serial.write("o");
-        Serial.printf("area checking:off\n");
+        DEBUG(Serial.printf("area checking:off\n");)
         delay(100);
         }
       if (strcmp(m, "RESET")==0) Serial.write("r");
     }
-    
-    Serial.print("Incoming message --> ");
-    Serial.printf("%s :", topic);
+
+   
+     DEBUG(Serial.print("Incoming message --> ");)
+    DEBUG(Serial.printf("%s :", topic);)
     //msg[msglen] = '\0';
-    Serial.println((char *)msg);
+    DEBUG(Serial.println((char *)msg);)
+  
+    
+    
 }
 
 void onFoundgear(char *attribute, uint8_t* msg, unsigned int msglen) {

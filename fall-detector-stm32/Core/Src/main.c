@@ -219,7 +219,9 @@ int main(void)
 
 		// listen command
 		length = readMessage(NODEMCU_HANDLE, buffer, 1);
-		uartPrintf(NODEMCU_HANDLE, buffer[0]);
+		if (length == 0) {
+			uartPrintf(NODEMCU_HANDLE, "%c", buffer[0]);
+		}
 		if (length > 0) {
 			switch (buffer[0]) {
 			case 'R':
