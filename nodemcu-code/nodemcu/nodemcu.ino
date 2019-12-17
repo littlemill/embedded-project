@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-/*#include <dummy.h>*/
-=======
 // #include <dummy.h>
->>>>>>> 339d3a40f4026c4a0351a644349802acf8dd3830
 
 /*  NETPIE ESP8266 basic sample                            */
 /*  More information visit : https://netpie.io             */
@@ -34,7 +30,6 @@ MicroGear microgear(client);
 
 /* If a new message arrives, do this */
 void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
-
     // TODO: check topic and handle message
     char* m="onMsghandler";
     //Serial.printf("%s : %s\n",m,topic);
