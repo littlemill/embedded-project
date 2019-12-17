@@ -284,6 +284,17 @@ int main(void) {
 	}
 #endif
 
+	if(enableFallAlarm) {
+		uartPrintf(NODEMCU_HANDLE, "S");
+	}else if(!enableFallAlarm){
+		uartPrintf(NODEMCU_HANDLE, "s");
+	}
+	if(enableOutAlarm) {
+			uartPrintf(NODEMCU_HANDLE, "U");
+		}else if(!enableOutAlarm){
+			uartPrintf(NODEMCU_HANDLE, "u");
+	}
+
 	}
 	/* USER CODE END 3 */
 }
