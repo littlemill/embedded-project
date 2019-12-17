@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-// #define DEV //
+//#define DEV //
 #include "mydefines.h"
 
 #include "stm32f4xx_hal_uart.h"
@@ -212,12 +212,16 @@ int main(void)
 
 			// check fall sensor logic -- change logic.h
 			fallingNow = checkFalling(ax, ay, az, gx, gy, gz);
-			HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, (fallingNow || hasFallen()) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+			if (fallingNow || hasFallen()) {
+				HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, GPIO_PIN_SET);
+			} else {
+				HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, GPIO_PIN_RESET);
+			}
 		}
 
 		// listen command
 		length = readMessage(NODEMCU_HANDLE, buffer, 1);
-		uartPrintf(NODEMCU_HANDLE, buffer[0]);
+		uartPrintf(RED_BOARD_HANDLE, "%c" ,buffer[0]);
 		if (length > 0) {
 			switch (buffer[0]) {
 			case 'R':
