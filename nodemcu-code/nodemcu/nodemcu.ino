@@ -122,10 +122,29 @@ void loop() {
     case 'f': Serial.println("Not Fall"); break;
     case 'E': Serial.println("Error"); break;
     case 'e': Serial.println("Not error"); break;
+<<<<<<< HEAD
     case 'S': Serial.println("Status Fall detector : ON"); break;
     case 's': Serial.println("Status Fall detector : OFF"); break;
     case 'T': Serial.println("Status Out of range : ON"); break;
     case 't': Serial.println("Status Out of range : OFF"); break;
+=======
+    case 'S': Serial.println("Status Fall detector : ON"); {
+      microgear.publish("/status/commard","fall_on");
+      break;
+    }
+    case 's': Serial.println("Status Fall detector : OFF"); {
+      microgear.publish("/status/commard","fall_off");
+      break;
+    }
+    case 'U': Serial.println("Status Out of range : ON"); {
+      microgear.publish("/status/commard","out_on");
+      break;
+    }
+    case 'u': Serial.println("Status Out of range : OFF"); {
+      microgear.publish("/status/commard","out_off");
+      break;
+    }
+>>>>>>> upstream/kanjeranian
     }
 
     // คนกำลังเดินออกจากพื้นที่ -> HTML
