@@ -15,8 +15,8 @@
 //#define DEBUG(code) code
 #define DEBUG(code) 
 
-#define WIFI_SSID "OIL"
-#define WIFI_PASSWORD "123456790"
+#define WIFI_SSID "ton-naao"
+#define WIFI_PASSWORD "mynameisaim"
   
 #define ALIAS   "esp8266"
   

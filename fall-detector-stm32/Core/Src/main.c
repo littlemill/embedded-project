@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-// #define DEV //
+#define DEV //
 #include "mydefines.h"
 
 #include "stm32f4xx_hal_uart.h"
