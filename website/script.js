@@ -43,14 +43,18 @@ microgear.on('connected', function() {
   microgear.setAlias(ALIAS);
   document.getElementById('connected_NETPIE').innerHTML =
     'Netpie status : connected !';
+  // microgear.subscribe('/fall/command');
+  // microgear.subscribe('/status/command');
+  microgear.subscribe('/status/command');
+  microgear.subscribe('/range');
+  microgear.subscribe('/fall');
+  microgear.subscribe('/board');
 });
-
-microgear.subscribe('/fall/command');
-microgear.subscribe('/status/command');
 
 microgear.on('message', function(topic, data) {
   console.log(topic);
   topic = topic.replace('/testingNetpie', '');
+
   if (topic == '/fall') {
     if (data == 'ok') {
       document.getElementById('status_fall').innerHTML =
@@ -71,7 +75,7 @@ microgear.on('message', function(topic, data) {
     if (data == 'fine') {
       document.getElementById('status_fall').innerHTML = 'use me XD';
     } else if (data == 'error') {
-      document.getElementById('status_fall').innerHTML = 'fix me XP';
+      document.getElementById('status_range').innerHTML = 'fix me XP';
     }
   } else if (topic == '/status/command') {
     if (data == 'fall_on') {

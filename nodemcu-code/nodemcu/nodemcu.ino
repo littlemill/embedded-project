@@ -37,6 +37,11 @@ MicroGear microgear(client);
 
 int enableDebugPin = 0; // D3 Pin
 int debug = 0;
+int cmd;
+bool fall_on_status_before = false;
+bool fall_on_status_now = false;
+bool range_on_status_before = false;
+bool range_on_status_now = false;
 
 // BIG TODO: เอา print debug ออกเพราะมันส่งไปบอร์ดจริงๆด้วย
 
@@ -56,15 +61,15 @@ void onMsghandler(char * topic, uint8_t * msg, unsigned int msglen) {
     if (strcmp(m, "RESET") == 0) Serial.write("R");
   }
 
-  //เปิด / ปิด area checking ** เทียบว่าอันแรกเป็นไงเทียบกับอันสอง
+/*เปิด / ปิด area checking ** เทียบว่าอันแรกเป็นไงเทียบกับอันสอง*/
   if (strcmp(topic, "/testingNetpie/out-of-range/command") == 0) {
     DEBUG(Serial.println("/testingNetpie/out-of-range/command is detected !\n");)
     m = (char * ) msg;
     m[msglen] = '\0';
     if (strcmp(m, "ON") == 0) {
-      //        DEBUG( Serial.printf(t); )
       Serial.write("O");
       DEBUG(Serial.printf("area checking:on\n");)
+      
     }
     if (strcmp(m, "OFF") == 0) {
       Serial.write("o");
@@ -144,16 +149,12 @@ void setup() {
   microgear.connect(APPID);
 }
 
-int cmd;
-bool fall_on_status_before = false;
-bool fall_on_status_now = true;
 
 void loop() {
-  // read command from MCU TODO: handle more command
   debug = digitalRead(enableDebugPin);
   cmd = Serial.read();
   DEBUG(switch (cmd) {
-        case 'F': Serial.println("Fall"); break; // send to NETPIE ?
+        case 'F': Serial.println("Fall"); break; 
         case 'f': Serial.println("Not Fall"); break;
         case 'E': Serial.println("Error"); break;
         case 'e': Serial.println("Not error"); break;
@@ -173,32 +174,28 @@ void loop() {
                 fall_on_status_before=fall_on_status_now;
             }
             break;
-
-        case 'u': 
-            range_on_status_now = false;
-            if(range_on_status_before!=fall_on_status_now){
-                Serial.println("Status Fall detector : OFF"); 
-                microgear.publish("/status/command", "fall_off");
-                fall_on_status_before=fall_on_status_now;
+        case 'U': 
+            range_on_status_now = true;
+            if(range_on_status_before!=range_on_status_now){
+                Serial.println("Status Out of range : ON"); 
+                microgear.publish("/status/command","out_on");
+                range_on_status_before=range_on_status_now;
             }
             break;
-          
-        
-//        case 'U': Serial.println("Status Out of range : ON"); 
-//          microgear.publish("/status/command","out_on");
-//          break;
-//    
-//        case 'u': Serial.println("Status Out of range : OFF"); 
-//          microgear.publish("/status/command","out_off");
-//          break;
+        case 'u': 
+            range_on_status_now = false;
+            if(range_on_status_before!=range_on_status_now){
+                Serial.println("Status Out of range : OFF"); 
+                microgear.publish("/status/command","out_off");
+                range_on_status_before=range_on_status_now;
+            }
+            break;
       })
 
   
-  // คนกำลังเดินออกจากพื้นที่ -> HTML
-  long rssi = WiFi.RSSI();
+long rssi = WiFi.RSSI();
 
   /* To check if the microgear is still connected */
-//  DEBUG(Serial.print(microgear.connected());)
   if (microgear.connected()) {
     DEBUG( Serial.println("connected"); )
   
@@ -206,7 +203,6 @@ void loop() {
     microgear.loop();
 
     if (timer >= 1000) {
-      //     Serial.println("Publish...");
       DEBUG(Serial.println(rssi);)
       if (rssi < -80) {
         microgear.publish("/range", "out");

@@ -188,8 +188,10 @@ int main(void)
 
 		if (gyroConn) { // why did connected always return 0 ?
 			TM_MPU6050_ReadAll(&MPU6050_Sensor);
-			accMult = (float) 1 / ((1 << 16) / 16) * 9.81; // +-8G
-			gyroMult = (float) 1 / ((1 << 16) / 500); // +-250
+//			accMult = (float) 1 / ((1 << 16) / 16) * 9.81; // +-8G
+//			gyroMult = (float) 1 / ((1 << 16) / 500); // +-250
+			accMult = (float) 1 / ((1 << 16) / 3) * 9.81; // +-8G
+			gyroMult = (float) 1 / ((1 << 16) / 15); // +-250
 
 			ax = MPU6050_Sensor.Accelerometer_X * accMult;
 			ay = MPU6050_Sensor.Accelerometer_Y * accMult;
@@ -215,13 +217,14 @@ int main(void)
 			fallingNow = checkFalling(ax, ay, az, gx, gy, gz);
 			if (fallingNow || hasFallen()) {
 				HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, GPIO_PIN_SET);
+				fallen = 1;
 			} else {
 				HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, GPIO_PIN_RESET);
 			}
 		}
 
 		// listen command
-		length = HAL_UART_Receive(&huart2, readBuffer, 1, 10);
+//		length = HAL_UART_Receive(&huart2, readBuffer, 1, 10);
 		length = readMessage(NODEMCU_HANDLE, readBuffer, 1);
 		if (length > 0) {
 			uartPrintf(RED_BOARD_HANDLE, "read:%c\n" ,readBuffer[0]);
