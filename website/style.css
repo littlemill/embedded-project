@@ -1,0 +1,41 @@
+* {
+    font-family: "Montserrat", sans-serif;
+    text-align: center;
+}
+h1 {
+    font-family: "Montserrat", sans-serif;
+    text-align: center;
+}
+body{
+    background-color:#FEC8D8;
+}
+button {
+    font-family: "Montserrat", sans-serif;
+    font-size: 20px;
+    color: white ;
+    background-color:#957DAD;
+}
+.w3-row-padding img {margin-bottom: 12px}
+/* Set the width of the sidebar to 120px */
+.w3-sidebar {width: 120px;background:#FFDFD3;}
+/* Add a left margin to the "page content" that matches the width of the sidebar (120px) */
+#main {margin-left: 120px}
+/* Remove margins from "page content" on small screens */
+@media only screen and (max-width: 600px) {#main {margin-left: 0}}
+nav{
+    align-self: flex-end;
+    background-color: #FFDFD3;
+}
+#main_page{
+    background-color: #D291BC;
+}
+#fall_detector_page {
+    background-color:#FEC8D8;
+    /* background-image: image(src="./image/eldercare"); */
+}
+#tracking_page{
+    background-color: #E0BBE4;
+}
+#connected_NETPIE{
+    background-color: #957DAD;
+}
