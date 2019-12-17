@@ -16,10 +16,8 @@ microgear.connect(APPID);
 function falling(logic) {
   if (logic == 1) {
     microgear.publish('/fall/command', 'ON');
-    document.getElementById('status_fall_btn').innerHTML = 'Status : ON';
   } else if (logic == 0) {
     microgear.publish('/fall/command', 'OFF');
-    document.getElementById('status_fall_btn').innerHTML = 'Status : ON';
   } else if (logic == 2) {
     microgear.publish('/fall/command', 'RESET');
   }
@@ -29,11 +27,9 @@ function goOut(logic) {
   if (logic == 1) {
     console.log('logic1 = on');
     microgear.publish('/out-of-range/command', 'ON');
-    document.getElementById('status_range_btn').innerHTML = 'Status : ON';
   } else if (logic == 0) {
     console.log('logic0 = off');
     microgear.publish('/out-of-range/command', 'OFF');
-    document.getElementById('status_range_btn').innerHTML = 'Status : OFF';
   } else if (logic == 2) {
     console.log('logic2 = reset');
     microgear.publish('/out-of-range/command', 'RESET');
@@ -65,6 +61,16 @@ microgear.on('message', function(topic, data) {
       document.getElementById('status_fall').innerHTML = 'use me XD';
     } else if (data == 'error') {
       document.getElementById('status_fall').innerHTML = 'fix me XP';
+    }
+  } else if(topic == "/status/command") {
+    if(data=="fall_on"){
+      document.getElementById('status_fall_btn').innerHTML = "Status : ON";
+    }else if(data=="fall_off"){
+      document.getElementById('status_fall_btn').innerHTML = "Status : OFF";
+    }else if(data=="out_on"){
+      document.getElementById('status_range_btn').innerHTML = "Status : ON";
+    }else if(data=="out_off"){
+      document.getElementById('status_range_btn').innerHTML = "Status : OFF";
     }
   }
 });
