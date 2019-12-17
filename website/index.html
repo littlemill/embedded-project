@@ -1,32 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
   <script src="https://cdn.netpie.io/microgear.js"></script>
   <script src="script.js"></script>
 </head>
+<!-- Icon Bar (Sidebar - hidden on small screens) -->
+<nav class="w3-sidebar w3-bar-block w3-small w3-hide-small w3-center">
+    <!-- Avatar image in top left corner -->
+    <img src="./image/skate.png" style="width:100%">
+    <a href="main_page" class="w3-bar-item w3-button w3-padding-large ">
+    <img src="./image/house.png" width="50" >  
+      <p>home</p>
+    </a>
+    <a href="#fall_detector_page" class="w3-bar-item w3-button w3-padding-large ">
+    <img src="./image/grandfather.png" width="50" >
+      <p>fall detector mode</p>
+    </a>
+    <a href="#tracking_page" class="w3-bar-item w3-button w3-padding-large ">
+    <img src="./image/map.png" width="50" >
+      <p>tracking mode</p>
+    </a>
+  </nav>
 <body>
-
-</div>
-  <h1 id="fall_detector"></h1>
-  <p><strong id="topic">The Fall Detector</strong></p>
+<!-- Main Page -->
+<div class ="w3-padding-large" id="main_page">
+    <h1 id="welcome">Welcome to the fall detector system</h1>
+    <img src="./image/eldercare.jpg" width="950" >
+    <p>Using the fall detector to enhance the way you take care your love ones.</p>
+    <button type="button" onclick="falling(1)">Start using your fall detector device.</button>
+  </div>
+<!-- Fall Detector Page-->
+<div class ="w3-padding-large" id="fall_detector_page">
+  <h1 id="fall_detector">The Fall Detector</h1>
   <button type="button" onclick="falling(1)">Turn ON</button>
   <button type="button" onclick="falling(0)">Turn OFF</button>
   <button type="button" onclick="falling(2)">Reset</button>
   <p id="status_fall_btn">Status : ON</p>
-  <p id="status_fall">Every is OKAY :)</p>
+  <p id="status_fall">Everything is OKAY :)</p>
 </div>
 
-</div>
-  <h1 id="out_of_range"></h1>
-  <p><strong id="topic">Out of Range</strong></p>
+<!-- Tracking page-->
+<div class = "w3-padding-large" id = "tracking_page">
+  <h1 id="out_of_range">Tracking mode</h1>
   <button type="button" onclick="goOut(1)">Turn ON</button>
   <button type="button" onclick="goOut(0)">Turn OFF</button>
   <button type="button" onclick="goOut(2)">Reset</button>
   <p id="status_range_btn">Status : ON</p>
-  <p id="status_range">I can see you</p>
+  <p id="status_range">Patient's location is available</p>
 </div>
 
 <div id="connected_NETPIE">netpie status : not connected </div> 
 </body>
+
 </html>
+
+
 
