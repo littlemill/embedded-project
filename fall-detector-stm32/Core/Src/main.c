@@ -83,6 +83,7 @@ static void MX_USB_OTG_FS_HCD_Init(void);
 /* USER CODE BEGIN 0 */
 TM_MPU6050_t MPU6050_Sensor;
 char buffer[512];
+char readBuffer[10];
 int gyroConn = 0;
 // ========================= BUZZER =============================== //
 
@@ -220,10 +221,11 @@ int main(void)
 		}
 
 		// listen command
-		length = readMessage(NODEMCU_HANDLE, buffer, 1);
-		uartPrintf(RED_BOARD_HANDLE, "%c" ,buffer[0]);
+		length = HAL_UART_Receive(&huart2, readBuffer, 1, 10);
+		length = readMessage(NODEMCU_HANDLE, readBuffer, 1);
 		if (length > 0) {
-			switch (buffer[0]) {
+			uartPrintf(RED_BOARD_HANDLE, "read:%c\n" ,readBuffer[0]);
+			switch (readBuffer[0]) {
 			case 'R':
 				fallen = 0;
 				break;
