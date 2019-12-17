@@ -32,13 +32,13 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
       // TODO: check message and send command to device
       Serial.write("f");
     }
-    if (strcmp(topic, "/fall/command") == 0) {
+    if (strcmp(topic, "/testingNetpie/fall/command") == 0) {
       m = (char*)msg;
       if (strcmp(m, "ON")) Serial.write("F");
       if (strcmp(m, "OFF")) Serial.write("f");
       if (strcmp(m, "RESET")) Serial.write("R");
     }
-    if (strcmp(topic, "/out-of-range/command") == 0) {
+    if (strcmp(topic, "/testingNetpie/out-of-range/command") == 0) {
       m = (char*)msg;
       if (strcmp(m, "ON")) Serial.write("O");
       if (strcmp(m, "OFF")) Serial.write("o");
@@ -122,12 +122,6 @@ void loop() {
     case 'f': Serial.println("Not Fall"); break;
     case 'E': Serial.println("Error"); break;
     case 'e': Serial.println("Not error"); break;
-<<<<<<< HEAD
-    case 'S': Serial.println("Status Fall detector : ON"); break;
-    case 's': Serial.println("Status Fall detector : OFF"); break;
-    case 'T': Serial.println("Status Out of range : ON"); break;
-    case 't': Serial.println("Status Out of range : OFF"); break;
-=======
     case 'S': Serial.println("Status Fall detector : ON"); {
       microgear.publish("/status/commard","fall_on");
       break;
@@ -144,7 +138,6 @@ void loop() {
       microgear.publish("/status/commard","out_off");
       break;
     }
->>>>>>> upstream/kanjeranian
     }
 
     // คนกำลังเดินออกจากพื้นที่ -> HTML
