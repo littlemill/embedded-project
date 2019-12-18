@@ -2,6 +2,10 @@
     font-family: "Montserrat", sans-serif;
     text-align: center;
 }
+h1 {
+    font-family: "Montserrat", sans-serif;
+    text-align: center;
+}
 body{
     background-color:#FEC8D8;
 }
@@ -11,7 +15,6 @@ button {
     color: white ;
     background-color:#957DAD;
 }
-body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
 .w3-row-padding img {margin-bottom: 12px}
 /* Set the width of the sidebar to 120px */
 .w3-sidebar {width: 120px;background:#FFDFD3;}

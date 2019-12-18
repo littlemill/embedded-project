@@ -12,13 +12,15 @@ var microgear = Microgear.create({
 });
 
 microgear.connect(APPID);
-
 function falling(logic) {
   if (logic == 1) {
+    console.log('logic1 = on');
     microgear.publish('/fall/command', 'ON');
   } else if (logic == 0) {
+    console.log('logic0 = off');
     microgear.publish('/fall/command', 'OFF');
   } else if (logic == 2) {
+    console.log('logic2 = reset');
     microgear.publish('/fall/command', 'RESET');
   }
 }
@@ -40,21 +42,21 @@ microgear.on('connected', function() {
   console.log('NETPIE Connected');
   microgear.setAlias(ALIAS);
   document.getElementById('connected_NETPIE').innerHTML =
-    'netpie status : connected !';
+    'Netpie status : connected !';
 });
 
 microgear.on('message', function(topic, data) {
   if (topic == '/fall') {
     if (data == 'ok') {
-      document.getElementById('status_fall').innerHTML = 'Every is OKAY :)';
+      document.getElementById('status_fall').innerHTML = 'Everything is OKAY :)';
     } else if (data == 'fall') {
-      document.getElementById('status_fall').innerHTML = 'Falling!!!!!!!!!';
+      document.getElementById('status_fall').innerHTML = 'The patient is falling!!!!!!!!!';
     }
   } else if (topic == '/range') {
     if (data == 'in') {
-      document.getElementById('status_fall').innerHTML = 'I can see you';
+      document.getElementById('status_fall').innerHTML = "Patient's location is available";
     } else if (data == 'out') {
-      document.getElementById('status_fall').innerHTML = 'where are youuu';
+      document.getElementById('status_fall').innerHTML = "Patient's location is unavailable";
     }
   } else if (topic == '/board') {
     if (data == 'fine') {
