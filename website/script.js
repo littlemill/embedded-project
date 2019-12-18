@@ -42,10 +42,10 @@ microgear.on('connected', function() {
   console.log('NETPIE Connected');
   microgear.setAlias(ALIAS);
   document.getElementById('connected_NETPIE').innerHTML =
-    'Netpie status : connected !';
+    'NETPIE status : connected !';
 });
 
-microgear.on('message', function(topic, data) {
+microgear.publish('message', function(topic, data) {
   if (topic == '/fall') {
     if (data == 'ok') {
       document.getElementById('status_fall').innerHTML = 'Everything is OKAY :)';
