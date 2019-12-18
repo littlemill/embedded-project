@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-/*#include <dummy.h>*/
-=======
-// #include <dummy.h>
->>>>>>> 339d3a40f4026c4a0351a644349802acf8dd3830
+#include <dummy.h>
 
 /*  NETPIE ESP8266 basic sample                            */
 /*  More information visit : https://netpie.io             */
@@ -23,7 +19,7 @@
 #define WIFI_PASSWORD "mynameisaim"
   
 #define ALIAS   "esp8266"
-  
+
 WiFiClient client;
 ESP8266WiFiMulti WiFiMulti;
 
@@ -48,9 +44,10 @@ void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
     //เปิด / ปิด fall detect
     if (strcmp(topic, "/testingNetpie/fall/command") == 0) {
       m = (char*)msg;
-      if (strcmp(m, "ON")) Serial.write("F");
-      if (strcmp(m, "OFF")) Serial.write("f");
-      if (strcmp(m, "RESET")) Serial.write("R");
+      m[msglen] = '\0';
+      if (strcmp(m, "ON") == 0) Serial.write("F");
+      if (strcmp(m, "OFF") == 0) Serial.write("f");
+      if (strcmp(m, "RESET") == 0) Serial.write("R");
     }
 
     //เปิด / ปิด area checking ** เทียบว่าอันแรกเป็นไงเทียบกับอันสอง
