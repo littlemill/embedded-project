@@ -45,18 +45,27 @@ microgear.on('connected', function() {
     'NETPIE status : connected !';
 });
 
+microgear.subscribe('/fall/command');
+microgear.subscribe('/status/command');
+
 microgear.publish('message', function(topic, data) {
+  console.log(topic);
+  topic = topic.replace('/testingNetpie','');
   if (topic == '/fall') {
     if (data == 'ok') {
-      document.getElementById('status_fall').innerHTML = 'Everything is OKAY :)';
+      document.getElementById('status_fall').innerHTML =
+        'Everything is OKAY :)';
     } else if (data == 'fall') {
-      document.getElementById('status_fall').innerHTML = 'The patient is falling!!!!!!!!!';
+      document.getElementById('status_fall').innerHTML =
+        'The patient is falling!!!!!!!!!';
     }
   } else if (topic == '/range') {
     if (data == 'in') {
-      document.getElementById('status_fall').innerHTML = "Patient's location is available";
+      document.getElementById('status_fall').innerHTML =
+        "Patient's location is available";
     } else if (data == 'out') {
-      document.getElementById('status_fall').innerHTML = "Patient's location is unavailable";
+      document.getElementById('status_fall').innerHTML =
+        "Patient's location is unavailable";
     }
   } else if (topic == '/board') {
     if (data == 'fine') {
@@ -64,15 +73,15 @@ microgear.publish('message', function(topic, data) {
     } else if (data == 'error') {
       document.getElementById('status_fall').innerHTML = 'fix me XP';
     }
-  } else if(topic == "/status/command") {
-    if(data=="fall_on"){
-      document.getElementById('status_fall_btn').innerHTML = "Status : ON";
-    }else if(data=="fall_off"){
-      document.getElementById('status_fall_btn').innerHTML = "Status : OFF";
-    }else if(data=="out_on"){
-      document.getElementById('status_range_btn').innerHTML = "Status : ON";
-    }else if(data=="out_off"){
-      document.getElementById('status_range_btn').innerHTML = "Status : OFF";
+  } else if (topic == '/status/command') {
+    if (data == 'fall_on') {
+      document.getElementById('status_fall_btn').innerHTML = 'Status : ON';
+    } else if (data == 'fall_off') {
+      document.getElementById('status_fall_btn').innerHTML = 'Status : OFF';
+    } else if (data == 'out_on') {
+      document.getElementById('status_range_btn').innerHTML = 'Status : ON';
+    } else if (data == 'out_off') {
+      document.getElementById('status_range_btn').innerHTML = 'Status : OFF';
     }
   }
 });

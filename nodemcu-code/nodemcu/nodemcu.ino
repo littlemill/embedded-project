@@ -1,4 +1,4 @@
-#include <dummy.h>
+// #include <dummy.h>
 
 /*  NETPIE ESP8266 basic sample                            */
 /*  More information visit : https://netpie.io             */
@@ -30,16 +30,15 @@ MicroGear microgear(client);
 
 /* If a new message arrives, do this */
 void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
-
     // TODO: check topic and handle message
     char* m="onMsghandler";
     //Serial.printf("%s : %s\n",m,topic);
     
-    if (strcmp(topic, "/testingNetpie/fall/command") == 0) { // prefix the topic name with /testingNetpie/
-      // TODO: check message and send command to device
-      Serial.write("f");
-      DEBUG(Serial.println("Test\n");)
-    }
+//    if (strcmp(topic, "/testingNetpie/fall/command") == 0) { // prefix the topic name with /testingNetpie/
+//      // TODO: check message and send command to device
+//      Serial.write("f");
+//      DEBUG(Serial.println("Test\n");)
+//    }
     
     //เปิด / ปิด fall detect
     if (strcmp(topic, "/testingNetpie/fall/command") == 0) {
@@ -150,6 +149,23 @@ void loop() {
     case 'f': Serial.println("Not Fall"); break;
     case 'E': Serial.println("Error"); break;
     case 'e': Serial.println("Not error"); break;
+    case 'S': Serial.println("Status Fall detector : ON"); {
+      microgear.publish("/status/command","fall_on");
+      break;
+    }
+    case 's': Serial.println("Status Fall detector : OFF"); {
+      microgear.publish("/status/command","fall_off");
+      break;
+    }
+    case 'U': Serial.println("Status Out of range : ON"); {
+      microgear.publish("/status/command","out_on");
+      break;
+    }
+    case 'u': Serial.println("Status Out of range : OFF"); {
+      microgear.publish("/status/command","out_off");
+      break;
+    
+    }
     }
     // คนกำลังเดินออกจากพื้นที่ -> HTML
     long rssi = WiFi.RSSI();
