@@ -26,8 +26,9 @@
 // #include "defines.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
-//#define DEV //
+#define DEV //
 #include "mydefines.h"
 
 #include "stm32f4xx_hal_uart.h"
@@ -104,7 +105,7 @@ void gyroConnect(int maxTry) {
 	while (TM_MPU6050_Init(&MPU6050_Sensor, TM_MPU6050_Device_0,
 			TM_MPU6050_Accelerometer_8G, TM_MPU6050_Gyroscope_250s)
 			!= TM_MPU6050_Result_Ok && tries < maxTry) {
-		HAL_Delay(1);
+		HAL_Delay(10);
 		tries++;
 	}
 }
@@ -159,9 +160,11 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_HCD_Init();
   /* USER CODE BEGIN 2 */
+  	float accHistory[5] = {0}, gyroHistory[5] = {0}, _accSum = 0, _gyroSum = 0;
+  	int _aIdx = 0, _gIdx = 0;
 	float ax, ay, az, aMag, gx, gy, gz, gMag, accMult, gyroMult, length;
 	int outAlarmOn = 0, fallAlarmOn = 0;
-	int fallingNow = 0, gyroConn;
+	int fallingNow = 0, gyroConn, n;
 	uartPrintf(NODEMCU_HANDLE, "t");
 	gyroConnect(1000);
 
@@ -182,16 +185,17 @@ int main(void)
 
 		if (!(gyroConn = gyroConnected())) {
 			gyroConnect(100);
+			HAL_Delay(500);
 		}
 
 		uartPrintf(NODEMCU_HANDLE, gyroConnected() ? "e": "E");
 
 		if (gyroConn) { // why did connected always return 0 ?
 			TM_MPU6050_ReadAll(&MPU6050_Sensor);
-//			accMult = (float) 1 / ((1 << 16) / 16) * 9.81; // +-8G
-//			gyroMult = (float) 1 / ((1 << 16) / 500); // +-250
-			accMult = (float) 1 / ((1 << 16) / 3) * 9.81; // +-8G
-			gyroMult = (float) 1 / ((1 << 16) / 15); // +-250
+			accMult = (float) 1 / ((1 << 16) / 16) * 9.81; // +-8G
+			gyroMult = (float) 1 / ((1 << 16) / 500); // +-250
+//			accMult = (float) 1 / ((1 << 16) / 5) * 9.81; // +-8G
+//			gyroMult = (float) 1 / ((1 << 16) / 20); // +-250
 
 			ax = MPU6050_Sensor.Accelerometer_X * accMult;
 			ay = MPU6050_Sensor.Accelerometer_Y * accMult;
@@ -203,24 +207,64 @@ int main(void)
 			gz = MPU6050_Sensor.Gyroscope_Z * gyroMult;
 			gMag = gx * gx + gy * gy + gz * gz;
 
+			if(aMag == 0 && gMag==0){
+				HAL_GPIO_WritePin(GYRO_STATUS_LED_PIN, GPIO_PIN_SET);
+			}else{
+				HAL_GPIO_WritePin(GYRO_STATUS_LED_PIN, GPIO_PIN_RESET);
+			}
+
 			/* Send the data to serial buffer */
 #ifdef DEV
-			int n =
-					sprintf(buffer,
-							"A (%5.2f %5.2f %5.2f = %7.2f) G (%7.2f %7.2f %7.2f = %.2f)\r\n",
-							ax, ay, az, aMag, gx, gy, gz, gMag);
-			//	uartPrintf(RED_BOARD_HANDLE, "A (%5.2f %5.2f %5.2f = %7.2f) G (%7.2f %7.2f %7.2f = %.2f)\r\n", ax, ay, az, aMag, gx, gy, gz, gMag);
-			HAL_UART_Transmit(RED_BOARD_HANDLE, buffer, n, 100);
+//		 n =
+//					sprintf(buffer,
+//							"A (%5.2f %5.2f %5.2f = %7.2f) G (%7.2f %7.2f %7.2f = %.2f)\r\n",
+//							ax, ay, az, aMag, gx, gy, gz, gMag);
+//			//	uartPrintf(RED_BOARD_HANDLE, "A (%5.2f %5.2f %5.2f = %7.2f) G (%7.2f %7.2f %7.2f = %.2f)\r\n", ax, ay, az, aMag, gx, gy, gz, gMag);
+//			HAL_UART_Transmit(RED_BOARD_HANDLE, buffer, n, 100);
 #endif
 
-			// check fall sensor logic -- change logic.h
-			fallingNow = checkFalling(ax, ay, az, gx, gy, gz);
-			if (fallingNow || hasFallen()) {
+			_accSum -= accHistory[_aIdx];
+			_gyroSum -= gyroHistory[_gIdx];
+			_accSum += (accHistory[_aIdx] = aMag);
+			_gyroSum += (gyroHistory[_gIdx] = gMag);
+
+			if (_accSum/5 > 70 && _accSum/5<500 && _gyroSum/5 > 36000 && _gyroSum/5 < 49000) {
+
+				if(_accSum/5 > 90 && _accSum/5<190 && _gyroSum/5 > 40000 ){
+					//run
+				}else{
+					n =
+										sprintf(buffer,
+												"------------- A/5 (%.2f) G/5 (%.2f)\r\n",
+												_accSum/5, _gyroSum/5);
+					HAL_UART_Transmit(RED_BOARD_HANDLE, buffer, n, 100);
+					fallen = 1;
+					for(int i=0;i<5;i++){
+						_accSum=0;
+						_gyroSum=0;
+						accHistory[i]=0;
+						gyroHistory[i]=0;
+					}
+				}
+
+			}
+			n =
+								sprintf(buffer,
+										"------------- A/5 (%.2f) G/5 (%.2f)\r\n",
+										_accSum/5, _gyroSum/5);
+			HAL_UART_Transmit(RED_BOARD_HANDLE, buffer, n, 100);
+
+
+			if (accHistory[_aIdx] > 300 || gyroHistory[_gIdx] > 20000) {
 				HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, GPIO_PIN_SET);
-				fallen = 1;
 			} else {
 				HAL_GPIO_WritePin(FALL_STATUS_LED_PIN, GPIO_PIN_RESET);
 			}
+			_aIdx++;
+			_aIdx %= 5;
+			_gIdx++;
+			_gIdx %= 5;
+
 		}
 
 		// listen command
@@ -291,13 +335,20 @@ int main(void)
 		}
 
 #else
+//	if (fallAlarmOn){
+//		uartPrintf(NODEMCU_HANDLE, "F");
+//	}
+//	else {
+//		uartPrintf(NODEMCU_HANDLE, "f");
+//	}
+#endif
+
 	if (fallAlarmOn){
 		uartPrintf(NODEMCU_HANDLE, "F");
 	}
 	else {
 		uartPrintf(NODEMCU_HANDLE, "f");
 	}
-#endif
 
 	if(enableFallAlarm) {
 		uartPrintf(NODEMCU_HANDLE, "S");

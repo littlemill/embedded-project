@@ -21,11 +21,14 @@
 }
 //#define DEBUG(code) 
 
-#define WIFI_SSID "ton-naao"
-#define WIFI_PASSWORD "mynameisaim"
+//#define WIFI_SSID "ton-naao"
+//#define WIFI_PASSWORD "mynameisaim"
 
 //# define WIFI_SSID "LAPTOP-6BIT21R4 7795"
 //#define WIFI_PASSWORD "0!fA4660"
+
+# define WIFI_SSID "OIL"
+#define WIFI_PASSWORD "123456790"
 
 # define ALIAS "esp8266"
 
