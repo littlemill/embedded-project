@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /*#include <dummy.h>*/
+=======
+// #include <dummy.h>
+>>>>>>> 339d3a40f4026c4a0351a644349802acf8dd3830
 
 /*  NETPIE ESP8266 basic sample                            */
 /*  More information visit : https://netpie.io             */
@@ -15,8 +19,8 @@
 //#define DEBUG(code) code
 #define DEBUG(code) 
 
-#define WIFI_SSID "OIL"
-#define WIFI_PASSWORD "123456790"
+#define WIFI_SSID "ton-naao"
+#define WIFI_PASSWORD "mynameisaim"
   
 #define ALIAS   "esp8266"
   
