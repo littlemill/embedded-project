@@ -1,4 +1,4 @@
-#include <dummy.h>
+/*#include <dummy.h>*/
 
 /*  NETPIE ESP8266 basic sample                            */
 /*  More information visit : https://netpie.io             */
@@ -29,7 +29,7 @@ MicroGear microgear(client);
 // BIG TODO: เอา print debug ออกเพราะมันส่งไปบอร์ดจริงๆด้วย
 
 /* If a new message arrives, do this */
-void onMsghandler(char topic, uint8_t msg, unsigned int msglen) {
+void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
 
     // TODO: check topic and handle message
     char* m="onMsghandler";
@@ -77,14 +77,14 @@ void onMsghandler(char topic, uint8_t msg, unsigned int msglen) {
     
 }
 
-void onFoundgear(char attribute, uint8_t msg, unsigned int msglen) {
+void onFoundgear(char *attribute, uint8_t* msg, unsigned int msglen) {
     Serial.print("Found new member --> ");
     for (int i=0; i<msglen; i++)
         Serial.print((char)msg[i]);
     Serial.println();  
 }
 
-void onLostgear(char attribute, uint8_t msg, unsigned int msglen) {
+void onLostgear(char *attribute, uint8_t* msg, unsigned int msglen) {
     Serial.print("Lost member --> ");
     for (int i=0; i<msglen; i++)
         Serial.print((char)msg[i]);
@@ -92,7 +92,7 @@ void onLostgear(char attribute, uint8_t msg, unsigned int msglen) {
 }
 
 /* When a microgear is connected, do this */
-void onConnected(char attribute, uint8_t msg, unsigned int msglen) {
+void onConnected(char *attribute, uint8_t* msg, unsigned int msglen) {
     Serial.println("Connected to NETPIE...");
     /* Set the alias of this microgear ALIAS */
     microgear.subscribe("/fall/command"); // TODO: subscribe to more topic 
@@ -149,10 +149,6 @@ void loop() {
     case 'f': Serial.println("Not Fall"); break;
     case 'E': Serial.println("Error"); break;
     case 'e': Serial.println("Not error"); break;
-    case 'S': Serial.println("Status Fall detector : ON"); break;
-    case 's': Serial.println("Status Fall detector : OFF"); break;
-    case 'T': Serial.println("Status Out of range : ON"); break;
-    case 't': Serial.println("Status Out of range : OFF"); break;
     }
     // คนกำลังเดินออกจากพื้นที่ -> HTML
     long rssi = WiFi.RSSI();
