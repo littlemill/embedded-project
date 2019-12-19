@@ -21,14 +21,14 @@
 }
 //#define DEBUG(code) 
 
-//#define WIFI_SSID "ton-naao"
-//#define WIFI_PASSWORD "mynameisaim"
+#define WIFI_SSID "ton-naao"
+#define WIFI_PASSWORD "mynameisaim"
 
 //# define WIFI_SSID "LAPTOP-6BIT21R4 7795"
 //#define WIFI_PASSWORD "0!fA4660"
 
-# define WIFI_SSID "OIL"
-#define WIFI_PASSWORD "123456790"
+//# define WIFI_SSID "OIL"
+//#define WIFI_PASSWORD "123456790"
 
 # define ALIAS "esp8266"
 
@@ -156,6 +156,7 @@ void setup() {
 void loop() {
   debug = digitalRead(enableDebugPin);
   cmd = Serial.read();
+  DEBUG(Serial.write(cmd);)
   DEBUG(switch (cmd) {
         case 'F': Serial.println("Fall"); break; 
         case 'f': Serial.println("Not Fall"); break;
@@ -181,13 +182,15 @@ void loop() {
             range_on_status_now = true;
             if(range_on_status_before!=range_on_status_now){
                 Serial.println("Status Out of range : ON"); 
-                microgear.publish("/status/command","out_on");
+                microgear.publish("/status/command","out_on"); microgear.publish("/status/command", "out_on");
+                
                 range_on_status_before=range_on_status_now;
             }
             break;
         case 'u': 
             range_on_status_now = false;
             if(range_on_status_before!=range_on_status_now){
+                Serial.write(">>>Z<<<<<");
                 Serial.println("Status Out of range : OFF"); 
                 microgear.publish("/status/command","out_off");
                 range_on_status_before=range_on_status_now;
@@ -209,6 +212,7 @@ long rssi = WiFi.RSSI();
       DEBUG(Serial.println(rssi);)
       if (rssi < -80) {
         microgear.publish("/range", "out");
+//        microgear.publish("/status/command", "out_on");
         Serial.write("X");
       } else {
         microgear.publish("/range", "in");

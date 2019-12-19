@@ -28,7 +28,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#define DEV //
+//#define DEV //
 #include "mydefines.h"
 
 #include "stm32f4xx_hal_uart.h"
@@ -114,7 +114,9 @@ void uartPrintf(UART_HandleTypeDef *handle, const char *format, ...) {
 	va_list args;
 	va_start(args, format);
 	int n = sprintf(buffer, format, args);
-	HAL_UART_Transmit(handle, buffer, n, 1000);
+//	HAL_UART_Transmit(handle, buffer, n, 1000);
+	HAL_UART_Transmit(&huart2, buffer, n, 1000);
+	HAL_UART_Transmit(&huart3, buffer, n, 1000);
 	va_end(args);
 }
 
